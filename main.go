@@ -21,8 +21,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/microcosm-cc/bluemonday"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/microcosm-cc/bluemonday"
 
 	"gopkg.in/yaml.v3"
 )
@@ -651,22 +651,29 @@ func POST_Handling(c *gin.Context) {
 		if cfg.DisableNotification {
 			msg.DisableNotification = true
 		}
-
 		sendmsg, err := bot.Send(msg)
 		if err == nil {
 			c.String(http.StatusOK, "telegram msg sent.")
 		} else {
-			log.Printf("Error sending message: %s", err)
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"err":     fmt.Sprint(err),
-				"message": sendmsg,
-				"srcmsg":  fmt.Sprint(msgtext),
-			})
-			msg := tgbotapi.NewMessage(chatid, "Error sending message, checkout logs")
-			if cfg.DisableNotification {
-				msg.DisableNotification = true
+			ret := 2
+			for ret != 0 {
+				sendmsg, err = bot.Send(msg)
+				if err != nil {
+					log.Printf("Error sending message: %s", err)
+					c.JSON(http.StatusServiceUnavailable, gin.H{
+						"err":     fmt.Sprint(err),
+						"message": sendmsg,
+						"srcmsg":  fmt.Sprint(msgtext),
+					})
+					err_msg := tgbotapi.NewMessage(chatid, "Error sending message, checkout logs")
+
+					if cfg.DisableNotification {
+						msg.DisableNotification = true
+					}
+					bot.Send(err_msg)
+				}
 			}
-			bot.Send(msg)
+			c.String(http.StatusOK, "telegram msg sent.")
 		}
 	}
 

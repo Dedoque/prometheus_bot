@@ -1,0 +1,49 @@
+{{ $length := len .GroupLabels -}} {{ if ne $length 0 }}
+<b>Grouped for:</b>
+{{ range $key,$val := .GroupLabels -}}
+    {{$key}} = <code>{{$val}}</code>
+{{ end -}}
+{{ end -}}
+silence url = <a href="{{ .ExternalURL }}/#/silences/new?filter=%7B
+        {{- range .CommonLabels.SortedPairs -}}
+            {{- if ne .Name "alertname" -}}
+                {{- .Name }}%3D%22{{- .Value -}}%22%2C%20
+            {{- end -}}
+        {{- end -}}
+        alertname%3D%22{{- .CommonLabels.alertname -}}%22%7D">Alertmanager</a>
+
+{{if eq .Status "firing"}}
+		Status: <b>{{.Status | str_UpperCase}} 🔥</b>
+{{end -}}
+{{if eq .Status "resolved"}}
+		Status: <b>{{.Status | str_UpperCase}} ✅</b>
+{{end -}}
+
+{{ $alert_len := len .Alerts -}}
+<b>Count of instance in alert group:</b> {{ $alert_len }}
+
+{{if lt $alert_len 10 -}}
+{{- range $val := .Alerts }}
+  <b>Active Alert List:</b>
+  {{$severity := index $val.Labels "severity" -}}
+  {{if eq $severity "Warning" -}}
+  Severity: {{$severity}} ⚠️
+  {{else if eq $severity "Critical" -}}
+  Severity: {{$severity}} 🚨
+  {{else -}}
+  Severity: {{$severity}}
+  {{ end -}}
+  {{$instance := index $val.Labels "instance" -}}
+  Target: {{$instance}}
+  {{ if index $val.Labels "value" -}}
+  Value: {{ index $val.Labels "value" }}
+  {{ else if index $val.Annotations "value" -}}
+  Value: {{ index $val.Annotations "value" }}
+  {{ end -}}
+  Active from: {{ $val.StartsAt | str_FormatDate }}
+  Summary: {{ $val.Annotations.summary }}
+  Description: {{ $val.Annotations.description }}
+{{ end -}}
+{{else -}}
+  To many instances to sent extend alert detail info;
+{{ end -}}
