@@ -560,7 +560,9 @@ func AlertFormatTemplate(alerts Alerts) string {
 	err = tmpH.Execute(writer, alerts)
 
 	if err != nil {
-		log.Fatalf("Problem with template execution: %v", err)
+
+		// log.Fatalf("Problem with template execution: %v", err)
+		return fmt.Sprintf("Problem with template execution: %v", err)
 	}
 
 	return bytesBuff.String()
@@ -653,10 +655,11 @@ func POST_Handling(c *gin.Context) {
 		}
 		sendmsg, err := bot.Send(msg)
 		if err == nil {
-			c.String(http.StatusOK, "telegram msg sent.")
+			c.String(http.StatusOK, "telegram msg sent. ret: 0")
 		} else {
 			ret := 2
 			for ret != 0 {
+				log.Printf("Error sending message: %s, ret: %v", err, ret)
 				sendmsg, err = bot.Send(msg)
 				if err != nil {
 					log.Printf("Error sending message: %s", err)
@@ -664,6 +667,7 @@ func POST_Handling(c *gin.Context) {
 						"err":     fmt.Sprint(err),
 						"message": sendmsg,
 						"srcmsg":  fmt.Sprint(msgtext),
+						"ret":     fmt.Sprint(ret),
 					})
 					err_msg := tgbotapi.NewMessage(chatid, "Error sending message, checkout logs")
 
@@ -672,6 +676,7 @@ func POST_Handling(c *gin.Context) {
 					}
 					bot.Send(err_msg)
 				}
+				log.Printf("Sending failed, retrying...%v", ret)
 			}
 			c.String(http.StatusOK, "telegram msg sent.")
 		}

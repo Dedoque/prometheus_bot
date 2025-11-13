@@ -18,7 +18,7 @@
         {
             "annotations": {
                 "description": "mail02.example.com has been down for more than 1 minute.",
-                "summary": "Service mail02.example.com down"
+                "summary": "Service <b>mail02.example.com down"
             },
             "sendsAt": "",
             "generatorURL": "",
@@ -112,7 +112,7 @@
         },
         {
             "annotations": {
-                "description": "mail01.example.com has been down for more than 1 minute.",
+                "description": "mail01.example.com ***has been down*** for more than 1 minute.",
                 "summary": "Service mail01.example.com down"
             },
             "sendsAt": "",
