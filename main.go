@@ -653,33 +653,50 @@ func POST_Handling(c *gin.Context) {
 		if cfg.DisableNotification {
 			msg.DisableNotification = true
 		}
-		sendmsg, err := bot.Send(msg)
-		if err == nil {
-			c.String(http.StatusOK, "telegram msg sent. ret: 0")
-		} else {
-			ret := 2
-			for ret != 0 {
-				log.Printf("Error sending message: %s, ret: %v", err, ret)
-				sendmsg, err = bot.Send(msg)
-				if err != nil {
-					log.Printf("Error sending message: %s", err)
-					c.JSON(http.StatusServiceUnavailable, gin.H{
-						"err":     fmt.Sprint(err),
-						"message": sendmsg,
-						"srcmsg":  fmt.Sprint(msgtext),
-						"ret":     fmt.Sprint(ret),
-					})
-					err_msg := tgbotapi.NewMessage(chatid, "Error sending message, checkout logs")
 
-					if cfg.DisableNotification {
-						msg.DisableNotification = true
-					}
-					bot.Send(err_msg)
-				}
-				log.Printf("Sending failed, retrying...%v", ret)
+		// Set count 0 and while counter < 3 try to send msg else send 200
+		counter := 0
+		for counter < 3 {
+
+			sendmsg, err := bot.Send(msg)
+			if err == nil {
+				log.Printf("telegram msg sent. ret: %v", counter)
+				c.String(http.StatusOK, "telegram msg sent. ret: %v", counter)
+				break
+			} else {
+				log.Printf("Error sending message: %s, ret: %v", err, sendmsg)
+				counter++
 			}
-			c.String(http.StatusOK, "telegram msg sent.")
+
 		}
+
+		// sendmsg, err := bot.Send(msg)
+		// if err == nil {
+		// 	c.String(http.StatusOK, "telegram msg sent. ret: 0")
+		// } else {
+		// 	ret := 2
+		// 	for ret != 0 {
+		// 		log.Printf("Error sending message: %s, ret: %v", err, ret)
+		// 		sendmsg, err = bot.Send(msg)
+		// 		if err != nil {
+		// 			log.Printf("Error sending message: %s", err)
+		// 			c.JSON(http.StatusServiceUnavailable, gin.H{
+		// 				"err":     fmt.Sprint(err),
+		// 				"message": sendmsg,
+		// 				"srcmsg":  fmt.Sprint(msgtext),
+		// 				"ret":     fmt.Sprint(ret),
+		// 			})
+		// 			err_msg := tgbotapi.NewMessage(chatid, "Error sending message, checkout logs")
+
+		// 			if cfg.DisableNotification {
+		// 				msg.DisableNotification = true
+		// 			}
+		// 			bot.Send(err_msg)
+		// 		}
+		// 		log.Printf("Sending failed, retrying...%v", ret)
+		// 	}
+		// 	c.String(http.StatusOK, "telegram msg sent.")
+		// }
 	}
 
 }
