@@ -664,8 +664,8 @@ func POST_Handling(c *gin.Context) {
 				c.String(http.StatusOK, "telegram msg sent. ret: %v", counter)
 				break
 			} else {
-				log.Printf("Error sending message: %s, ret: %v", err, sendmsg)
 				counter++
+				log.Printf("Error sending message: %v, ret: %v", sendmsg, counter)
 			}
 
 		}

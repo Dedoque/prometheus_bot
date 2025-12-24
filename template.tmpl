@@ -13,7 +13,7 @@ silence url = <a href="{{ .ExternalURL }}/#/silences/new?filter=%7B
         alertname%3D%22{{- .CommonLabels.alertname -}}%22%7D">Alertmanager</a>
 
 {{if eq .Status "firing"}}
-		Status: <b>{{.Status | str_UpperCase}} 🔥 </b
+		Status: <b>{{.Status | str_UpperCase}} 🔥 </b>
 {{end -}}
 {{if eq .Status "resolved"}}
 		Status: <b>{{.Status | str_UpperCase}} ✅ </b>
